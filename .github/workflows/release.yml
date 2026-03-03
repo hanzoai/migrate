@@ -34,7 +34,8 @@ jobs:
               -ldflags="-s -w -X main.Version=$VERSION" \
               -tags 'clickhouse datastore file' \
               ./cmd/migrate
-            tar czf "${OUTPUT}.tar.gz" -C cli/build "migrate.${OS}-${ARCH}"
+            ln -f "$OUTPUT" cli/build/migrate
+            tar czf "${OUTPUT}.tar.gz" -C cli/build migrate
           done
 
           cd cli/build && sha256sum *.tar.gz > sha256sum.txt
