@@ -1,4 +1,4 @@
-# LLM.md - Hanzo Golang Migrate
+# Hanzo Golang Migrate
 
 ## Overview
 Go module: github.com/golang-migrate/migrate/v4
