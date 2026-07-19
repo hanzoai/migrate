@@ -32,7 +32,7 @@ jobs:
             CGO_ENABLED=0 GOOS=$OS GOARCH=$ARCH \
               go build -a -o "$OUTPUT" \
               -ldflags="-s -w -X main.Version=$VERSION" \
-              -tags 'clickhouse datastore file' \
+              -tags 'datastore file' \
               ./cmd/migrate
             ln -f "$OUTPUT" cli/build/migrate
             tar czf "${OUTPUT}.tar.gz" -C cli/build migrate
