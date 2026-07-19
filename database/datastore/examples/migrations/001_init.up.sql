@@ -1,3 +1,3 @@
 CREATE TABLE test_1 (
-    Date Date 
+    Date Date
 ) Engine=Memory;

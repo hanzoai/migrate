@@ -1,4 +1,4 @@
-package clickhouse_test
+package datastore_test
 
 import (
 	"context"
@@ -8,13 +8,15 @@ import (
 	"log"
 	"testing"
 
-	_ "github.com/ClickHouse/clickhouse-go"
 	"github.com/dhui/dktest"
 	"github.com/golang-migrate/migrate/v4"
-	"github.com/golang-migrate/migrate/v4/database/clickhouse"
+	"github.com/golang-migrate/migrate/v4/database/datastore"
 	dt "github.com/golang-migrate/migrate/v4/database/testing"
 	"github.com/golang-migrate/migrate/v4/dktesting"
 	_ "github.com/golang-migrate/migrate/v4/source/file"
+
+	// Registers the "datastore" database/sql driver (ClickHouse-wire native).
+	_ "github.com/hanzo-ds/go"
 )
 
 const defaultPort = 9000
@@ -30,15 +32,15 @@ var (
 	}
 )
 
-func clickhouseConnectionString(host, port, engine string) string {
+func datastoreConnectionString(host, port, engine string) string {
 	if engine != "" {
 		return fmt.Sprintf(
-			"clickhouse://%v:%v?username=user&password=password&database=db&x-multi-statement=true&x-migrations-table-engine=%v&debug=false",
+			"datastore://%v:%v?username=user&password=password&database=db&x-multi-statement=true&x-migrations-table-engine=%v&debug=false",
 			host, port, engine)
 	}
 
 	return fmt.Sprintf(
-		"clickhouse://%v:%v?username=user&password=password&database=db&x-multi-statement=true&debug=false",
+		"datastore://%v:%v?username=user&password=password&database=db&x-multi-statement=true&debug=false",
 		host, port)
 }
 
@@ -48,7 +50,7 @@ func isReady(ctx context.Context, c dktest.ContainerInfo) bool {
 		return false
 	}
 
-	db, err := sql.Open("clickhouse", clickhouseConnectionString(ip, port, ""))
+	db, err := sql.Open("datastore", datastoreConnectionString(ip, port, ""))
 
 	if err != nil {
 		log.Println("open error", err)
@@ -90,8 +92,8 @@ func testSimple(t *testing.T, engine string) {
 			t.Fatal(err)
 		}
 
-		addr := clickhouseConnectionString(ip, port, engine)
-		p := &clickhouse.ClickHouse{}
+		addr := datastoreConnectionString(ip, port, engine)
+		p := &datastore.Datastore{}
 		d, err := p.Open(addr)
 		if err != nil {
 			t.Fatal(err)
@@ -113,12 +115,12 @@ func testSimpleWithInstanceDefaultConfigValues(t *testing.T) {
 			t.Fatal(err)
 		}
 
-		addr := clickhouseConnectionString(ip, port, "")
-		conn, err := sql.Open("clickhouse", addr)
+		addr := datastoreConnectionString(ip, port, "")
+		conn, err := sql.Open("datastore", addr)
 		if err != nil {
 			t.Fatal(err)
 		}
-		d, err := clickhouse.WithInstance(conn, &clickhouse.Config{})
+		d, err := datastore.WithInstance(conn, &datastore.Config{})
 		if err != nil {
 			_ = conn.Close()
 			t.Fatal(err)
@@ -140,8 +142,8 @@ func testMigrate(t *testing.T, engine string) {
 			t.Fatal(err)
 		}
 
-		addr := clickhouseConnectionString(ip, port, engine)
-		p := &clickhouse.ClickHouse{}
+		addr := datastoreConnectionString(ip, port, engine)
+		p := &datastore.Datastore{}
 		d, err := p.Open(addr)
 		if err != nil {
 			t.Fatal(err)
@@ -169,8 +171,8 @@ func testVersion(t *testing.T, engine string) {
 			t.Fatal(err)
 		}
 
-		addr := clickhouseConnectionString(ip, port, engine)
-		p := &clickhouse.ClickHouse{}
+		addr := datastoreConnectionString(ip, port, engine)
+		p := &datastore.Datastore{}
 		d, err := p.Open(addr)
 		if err != nil {
 			t.Fatal(err)
@@ -204,8 +206,8 @@ func testDrop(t *testing.T, engine string) {
 			t.Fatal(err)
 		}
 
-		addr := clickhouseConnectionString(ip, port, engine)
-		p := &clickhouse.ClickHouse{}
+		addr := datastoreConnectionString(ip, port, engine)
+		p := &datastore.Datastore{}
 		d, err := p.Open(addr)
 		if err != nil {
 			t.Fatal(err)
