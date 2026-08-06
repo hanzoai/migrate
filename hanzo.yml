@@ -1,0 +1,25 @@
+# Canonical CI/CD config for hanzoai/migrate — the one file both the hanzoai/ci
+# reusable (.hanzo/workflows/cicd.yml) and platform.hanzo.ai read.
+#
+# A library + CLI (our golang-migrate fork), so no `images:` and no `deploy:` —
+# it ships as a Go module and from a tag, and nothing here is a running service.
+#
+# The build carries the FULL tag matrix from the Makefile's SOURCE + DATABASE
+# defaults, and that is the load-bearing part: every database and source driver
+# in this repo sits behind a build tag, so a bare `go build ./...` compiles the
+# core and NONE of the 20 drivers — it would stay green through a driver that
+# does not compile at all. With the tags, a break in any driver is a red build.
+#
+# The test run is scoped to the packages that do NOT need Docker. The driver
+# suites use dktesting, which starts a real database container per driver — and
+# `-short` only trims them to one version each, it does not skip them, so
+# `make test-short` (which also passes --ignore-errors, swallowing every
+# failure) is not a gate at all. What runs here is the migrator core, the
+# database/source driver contracts, the stub drivers, URL parsing and the
+# file/iofs sources: real tests that fail on a real break, no daemon required.
+test:
+  - name: build
+    run: |
+      set -e
+      go build -tags 'postgres mysql redshift cassandra spanner cockroachdb yugabytedb datastore mongodb sqlserver firebird neo4j pgx pgx5 rqlite file go_bindata github github_ee bitbucket aws_s3 google_cloud_storage godoc_vfs gitlab' ./...
+      go test -count=1 ./ ./database ./database/stub/... ./internal/url/... ./source ./source/file/... ./source/iofs/... ./source/stub/...
