@@ -13,5 +13,5 @@ The auxiliary query parameters listed below may be supplied to tailor migrate be
 
 ## Notes
 
-* Uses the `modernc.org/sqlite` sqlite db driver (pure Go)
-  * Has [limited `GOOS` and `GOARCH` support](https://pkg.go.dev/modernc.org/sqlite?utm_source=godoc#hdr-Supported_platforms_and_architectures)
+* Uses the `github.com/hanzoai/sqlite` driver, which registers the `sqlite` name over the pure-Go engine when cgo is off and over `github.com/hanzoai/csqlite` when it is on
+  * The pure-Go engine has [limited `GOOS` and `GOARCH` support](https://pkg.go.dev/modernc.org/sqlite?utm_source=godoc#hdr-Supported_platforms_and_architectures)

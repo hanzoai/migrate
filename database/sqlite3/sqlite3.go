@@ -12,7 +12,11 @@ import (
 
 	"github.com/golang-migrate/migrate/v4"
 	"github.com/golang-migrate/migrate/v4/database"
-	_ "github.com/mattn/go-sqlite3"
+	// Registers the "sqlite3" database/sql driver, the name this package opens
+	// with and the scheme it serves. The engine, not github.com/hanzoai/sqlite:
+	// that facade registers "sqlite", which sibling database/sqlite already
+	// registers through it, and database/sql panics on a duplicate driver name.
+	_ "github.com/hanzoai/csqlite"
 )
 
 func init() {

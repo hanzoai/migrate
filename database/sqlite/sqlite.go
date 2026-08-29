@@ -12,7 +12,15 @@ import (
 
 	"github.com/golang-migrate/migrate/v4"
 	"github.com/golang-migrate/migrate/v4/database"
-	_ "modernc.org/sqlite"
+	// Registers the "sqlite" database/sql driver this package opens with.
+	// A facade, not an engine: it binds "sqlite" to the cgo SQLCipher bindings
+	// when cgo is on and to the pure-Go engine when it is off, so the one name
+	// resolves under both. Sibling database/sqlite3 registers "sqlite3" from the
+	// engine directly, and database/sql panics if a name is registered twice.
+	//
+	// The sqlite:// URL scheme is the database.Register below, a separate
+	// registry, and is unaffected by which engine backs the driver name.
+	_ "github.com/hanzoai/sqlite"
 )
 
 func init() {
