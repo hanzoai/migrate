@@ -8,6 +8,7 @@ import (
 	"log"
 	nurl "net/url"
 	"regexp"
+	"slices"
 	"strconv"
 	"strings"
 	"sync/atomic"
@@ -202,7 +203,7 @@ func (s *Spanner) SetVersion(version int, dirty bool) error {
 				spanner.Delete(s.config.MigrationsTable, spanner.AllKeys()),
 				spanner.Insert(s.config.MigrationsTable,
 					[]string{"Version", "Dirty"},
-					[]interface{}{version, dirty},
+					[]any{version, dirty},
 				)}
 			return txn.BufferWrite(m)
 		})
@@ -261,8 +262,8 @@ func (s *Spanner) Drop() error {
 	}
 
 	stmts := make([]string, 0)
-	for i := len(res.Statements) - 1; i >= 0; i-- {
-		s := res.Statements[i]
+	for _, s := range slices.Backward(res.Statements) {
+
 		m := nameMatcher.FindSubmatch([]byte(s))
 
 		if len(m) == 0 {

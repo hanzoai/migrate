@@ -38,7 +38,7 @@ type Config struct {
 
 type Neo4j struct {
 	driver neo4j.Driver
-	lock   uint32
+	lock   atomic.Uint32
 
 	// Open and WithInstance need to guarantee that config is never nil
 	config *Config
@@ -120,7 +120,7 @@ func (n *Neo4j) Close() error {
 
 // local locking in order to pass tests, Neo doesn't support database locking
 func (n *Neo4j) Lock() error {
-	if !atomic.CompareAndSwapUint32(&n.lock, 0, 1) {
+	if !n.lock.CompareAndSwap(0, 1) {
 		return database.ErrLocked
 	}
 
@@ -128,7 +128,7 @@ func (n *Neo4j) Lock() error {
 }
 
 func (n *Neo4j) Unlock() error {
-	if !atomic.CompareAndSwapUint32(&n.lock, 1, 0) {
+	if !n.lock.CompareAndSwap(1, 0) {
 		return database.ErrNotLocked
 	}
 	return nil
@@ -146,7 +146,7 @@ func (n *Neo4j) Run(migration io.Reader) (err error) {
 	}()
 
 	if n.config.MultiStatement {
-		_, err = session.WriteTransaction(func(transaction neo4j.Transaction) (interface{}, error) {
+		_, err = session.WriteTransaction(func(transaction neo4j.Transaction) (any, error) {
 			var stmtRunErr error
 			if err := multistmt.Parse(migration, StatementSeparator, n.config.MultiStatementMaxSize, func(stmt []byte) bool {
 				trimStmt := bytes.TrimSpace(stmt)
@@ -194,7 +194,7 @@ func (n *Neo4j) SetVersion(version int, dirty bool) (err error) {
 
 	query := fmt.Sprintf("MERGE (sm:%s {version: $version}) SET sm.dirty = $dirty, sm.ts = datetime()",
 		n.config.MigrationsLabel)
-	_, err = neo4j.Collect(session.Run(query, map[string]interface{}{"version": version, "dirty": dirty}))
+	_, err = neo4j.Collect(session.Run(query, map[string]any{"version": version, "dirty": dirty}))
 	if err != nil {
 		return err
 	}
@@ -220,7 +220,7 @@ func (n *Neo4j) Version() (version int, dirty bool, err error) {
 	query := fmt.Sprintf(`MATCH (sm:%s) RETURN sm.version AS version, sm.dirty AS dirty
 ORDER BY COALESCE(sm.ts, datetime({year: 0})) DESC, sm.version DESC LIMIT 1`,
 		n.config.MigrationsLabel)
-	result, err := session.ReadTransaction(func(transaction neo4j.Transaction) (interface{}, error) {
+	result, err := session.ReadTransaction(func(transaction neo4j.Transaction) (any, error) {
 		result, err := transaction.Run(query, nil)
 		if err != nil {
 			return nil, err

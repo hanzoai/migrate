@@ -106,7 +106,7 @@ func (s *fakeS3) ListObjects(input *s3.ListObjectsInput) (*s3.ListObjectsOutput,
 		if strings.HasPrefix(name, prefix) {
 			if delimiter == "" || !strings.Contains(strings.Replace(name, prefix, "", 1), delimiter) {
 				output.Contents = append(output.Contents, &s3.Object{
-					Key: aws.String(name),
+					Key: new(name),
 				})
 			}
 		}

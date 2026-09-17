@@ -77,9 +77,9 @@ func parseURI(uri string) (*Config, error) {
 
 func (s *s3Driver) loadMigrations() error {
 	output, err := s.s3client.ListObjects(&s3.ListObjectsInput{
-		Bucket:    aws.String(s.config.Bucket),
-		Prefix:    aws.String(s.config.Prefix),
-		Delimiter: aws.String("/"),
+		Bucket:    new(s.config.Bucket),
+		Prefix:    new(s.config.Prefix),
+		Delimiter: new("/"),
 	})
 	if err != nil {
 		return err
@@ -142,8 +142,8 @@ func (s *s3Driver) ReadDown(version uint) (io.ReadCloser, string, error) {
 func (s *s3Driver) open(m *source.Migration) (io.ReadCloser, string, error) {
 	key := path.Join(s.config.Prefix, m.Raw)
 	object, err := s.s3client.GetObject(&s3.GetObjectInput{
-		Bucket: aws.String(s.config.Bucket),
-		Key:    aws.String(key),
+		Bucket: new(s.config.Bucket),
+		Key:    new(key),
 	})
 	if err != nil {
 		return nil, "", err

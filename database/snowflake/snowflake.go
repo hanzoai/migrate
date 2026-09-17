@@ -7,6 +7,7 @@ import (
 	"fmt"
 	"io"
 	nurl "net/url"
+	"slices"
 	"strconv"
 	"strings"
 	"sync/atomic"
@@ -231,8 +232,8 @@ func runesCount(input []rune, target rune) int {
 }
 
 func runesLastIndex(input []rune, target rune) int {
-	for i := len(input) - 1; i >= 0; i-- {
-		if input[i] == target {
+	for i, r := range slices.Backward(input) {
+		if r == target {
 			return i
 		}
 	}

@@ -85,11 +85,9 @@ func (g *Gitlab) Open(url string) (source.Driver, error) {
 	}
 
 	gn.listOptions = &gitlab.ListTreeOptions{
-		Path: &gn.path,
-		Ref:  &u.Fragment,
-		ListOptions: gitlab.ListOptions{
-			PerPage: DefaultMaxItemsPerPage,
-		},
+		Path:    &gn.path,
+		Ref:     &u.Fragment,
+		PerPage: DefaultMaxItemsPerPage,
 	}
 
 	gn.getOptions = &gitlab.GetFileOptions{

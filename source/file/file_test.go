@@ -156,7 +156,7 @@ func mustWriteFile(t testing.TB, dir, file string, body string) {
 func mustCreateBenchmarkDir(t *testing.B) (dir string) {
 	tmpDir := t.TempDir()
 
-	for i := 0; i < 1000; i++ {
+	for i := range 1000 {
 		mustWriteFile(t, tmpDir, fmt.Sprintf("%v_foobar.up.sql", i), "")
 		mustWriteFile(t, tmpDir, fmt.Sprintf("%v_foobar.down.sql", i), "")
 	}
